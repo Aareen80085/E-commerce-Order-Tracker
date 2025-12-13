@@ -42,10 +42,9 @@ class Order:
 #Total price of all items 
 def calculate_subtotal(self):
     line_totals = []
-    for product, quantity in self.items:
-        line_total = product.price * quantity
-        line_totals.append(line_total)
-    return sum(line_totals)
+    subtotal= list(map(lambda product, quantity: product*quantity,line_totals))
+    return sum(subtotal)
+
 
 #Calculates how much money to subtract based on discount code
 def calculate_discount(self):
@@ -57,9 +56,50 @@ def calculate_tax(self):
         subtotal_after_discount = self.calculate_subtotal() - self.calculate_discount()
         return subtotal_after_discount * self.tax_rate
 
+
 # Calculate final total
 def calculate_total(self):
         subtotal = self.calculate_subtotal()
         discount = self.calculate_discount()
         tax = self.calculate_tax()
         return subtotal - discount + tax
+
+#Final order summary
+def get_order_summary(self):
+        """Return formatted order summary"""
+        subtotal = self.calculate_subtotal()
+        discount = self.calculate_discount()
+        tax = self.calculate_tax()
+        total = self.calculate_total()
+
+        # Lambda functions for efficient formatting
+        format_currency = lambda amount: f"₹{amount:,.2f}"
+        format_line = lambda label, amount: f"{label}: {format_currency(amount)}\n"
+        
+        # Build summary lines using lambda-based approach
+        summary_lines = [
+            "\n" + "="*50 + "\n",
+            "BILL SUMMARY:\n",
+            "="*50 + "\n",
+            format_line("Subtotal", subtotal)
+        ]
+        
+        # Add discount section if applicable using conditional lambda
+        if discount > 0:
+            discount_section = [
+                f"Discount ({self.discount_code}): -{format_currency(discount)}\n",
+                f"After Discount: {format_currency(subtotal - discount)}\n"
+            ]
+            summary_lines.extend(discount_section)
+        
+        # Add tax and total using lambda formatting
+        summary_lines.extend([
+            format_line("Tax (18%)", tax),
+            "-"*50 + "\n",
+            format_line("Total", total),
+            "="*50 + "\n"
+        ])
+        
+        # Join all lines efficiently
+        summary = "".join(summary_lines)
+        return summary
