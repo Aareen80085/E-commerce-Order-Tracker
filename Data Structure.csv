@@ -1,0 +1,9 @@
+Shopping cart data structure
+E-commerce Order Tracker/
+├── shop_main.py
+├── product_class.py
+├── cart_manager.py
+├── order_tracker.py
+├── analytics.py
+├── inventory.csv
+├── orders.csv

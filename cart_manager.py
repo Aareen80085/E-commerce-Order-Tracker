@@ -1,23 +1,34 @@
 from collections import defaultdict
 
-class shoppingcart:
+class ShoppingCart:
     def __init__(self):
-        self.items = defaultdict(int)  # product -> qty
+        self.items = defaultdict(int)   # Product -> Quantity
 
-    def add(self, product, qty):
+    def add_item(self, product, qty):
+        if qty <= 0:
+            raise ValueError("Quantity must be positive")
         self.items[product] += qty
 
-    def update(self, product, qty):
+    def remove_item(self, product):
+        if product in self.items:
+            del self.items[product]
+
+    def update_quantity(self, product, qty):
         if qty <= 0:
-            self.items.pop(product, None)
+            self.remove_item(product)
         else:
             self.items[product] = qty
 
-    def remove(self, product):
-        self.items.pop(product, None)
-
     def subtotal(self):
-        return sum(map(lambda p: p[0].price * p[1], self.items.items()))
+        return sum(product.price * qty for product, qty in self.items.items())
 
     def is_empty(self):
         return len(self.items) == 0
+
+    def display_cart(self):
+        if self.is_empty():
+            print("Cart is empty")
+            return
+        print("\nSHOPPING CART:")
+        for product, qty in self.items.items():
+            print(f"{product.name} (Qty: {qty}) - {int(product.price * qty)}")
