@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
-from product_class import Product
-from cart_manager import ShoppingCart
+from product_class import product
+from cart_manager import shoppingcart
 
 TAX_RATE = 0.18
 
@@ -16,7 +16,7 @@ def status(msg):
 
 @status("Loading inventory")
 def load_inventory(path="inventory.csv"):
-    products = {}
+    products = {Laptop}
     with open(path, newline="") as f:
         for name, price, stock in csv.reader(f):
             if name == "name":
@@ -41,37 +41,67 @@ def save_order(cart, path="orders.csv"):
             line_total = product.price * qty
             w.writerow([date, product.name, qty, product.price, line_total])
 
-# --- Demo Flow ---
+# --- Menu Driven App ---
 products = load_inventory()
-cart = ShoppingCart()
+cart = shoppingcart()
 
-# Display catalog
-print("E-COMMERCE ORDER SYSTEM")
-print("Available Products:")
-for i, p in enumerate(products.values(), 1):
-    print(f"{i}. {p.name} - {int(p.price)} ({p.stock} in stock)")
+while True:
+    print("===== E-COMMERCE ORDER SYSTEM =====")
+    print("1. View Products")
+    print("2. Add to Cart")
+    print("3. View Cart")
+    print("4. Checkout")
+    print("5. Exit")
 
-# Add items (sample)
-cart.add(products["Laptop"], 1)
-cart.add(products["Mouse"], 2)
+    choice = input("Enter choice: ")
 
-# Reduce stock
-for product, qty in cart.items.items():
-    product.reduce_stock(qty)
+    if choice == "1":
+        print("Available Products:")
+        for i, p in enumerate(products.values(), 1):
+            print(f"{i}. {p.name} - {int(p.price)} ({p.stock} in stock)")
 
-# Billing
-subtotal = cart.subtotal()
-tax = (lambda s: s * TAX_RATE)(subtotal)
-total = subtotal + tax
+    elif choice == "2":
+        name = input("Enter product name: ")
+        if name not in products:
+            print("Product not found")
+            continue
+        qty = int(input("Enter quantity: "))
+        try:
+            products[name].reduce_stock(qty)
+            cart.add(products[name], qty)
+            print("Item added to cart")
+        except ValueError as e:
+            print(e)
 
-print("\nSHOPPING CART:")
-for product, qty in cart.items.items():
-    print(f"{product.name} (Qty: {qty}) - {int(product.price * qty)}")
+    elif choice == "3":
+        if cart.is_empty():
+            print("Cart is empty")
+        else:
+            print("SHOPPING CART:")
+            for product, qty in cart.items.items():
+                print(f"{product.name} (Qty: {qty}) - {int(product.price * qty)}")
 
-print("\nBILL SUMMARY:")
-print(f"Subtotal: {int(subtotal)}")
-print(f"Tax (18%): {int(tax)}")
+    elif choice == "4":
+        if cart.is_empty():
+            print("Cart is empty")
+            continue
+        subtotal = cart.subtotal()
+        tax = subtotal * TAX_RATE
+        total = subtotal + tax
 
-save_order(cart)
-save_inventory(products)
-print("Order saved to: orders.csv")
+        print("BILL SUMMARY:")
+        print(f"Subtotal: {int(subtotal)}")
+        print(f"Tax (18%): {int(tax)}")
+        print(f"Total: {int(total)}")
+
+        save_order(cart)
+        save_inventory(products)
+        print("Order saved to: orders.csv")
+        break
+
+    elif choice == "5":
+        print("Thank you for shopping!")
+        break
+
+    else:
+        print("Invalid choice")
