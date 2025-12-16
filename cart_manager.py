@@ -2,12 +2,16 @@ from collections import defaultdict
 
 class ShoppingCart:
     def __init__(self):
-        self.items = defaultdict(int)   # Product -> Quantity
+        self.items = {}
 
     def add_item(self, product, qty):
-        if qty <= 0:
-            raise ValueError("Quantity must be positive")
-        self.items[product] += qty
+        if product in self.items:
+            self.items[product] += qty
+        else:
+            self.items[product] = qty
+
+    def add(self, product, qty):
+        self.add_item(product, qty)
 
     def remove_item(self, product):
         if product in self.items:

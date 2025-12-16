@@ -1,4 +1,6 @@
 print("PROGRAM STARTED")
+from product_class import Product, Order
+from cart_manager import ShoppingCart
 # Decorator for automation status messages
 def status(msg):
     def decorator(func):
@@ -7,38 +9,6 @@ def status(msg):
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
-
-class Product:
-
-    def __init__(self, name, price, stock):
-        self.name = name
-        self.price = price
-        self.stock = stock
-
-    def reduce_stock(self, qty):
-        if qty > self.stock:
-            raise ValueError("Insufficient stock")
-        self.stock -= qty
-
-    def to_row(self):
-        return [self.name, self.price, self.stock]
-
-
-class Order:
-    def __init__(self, cart, tax_rate=0.18, discount=0):
-        self.cart = cart
-        self.tax_rate = tax_rate
-        self.discount = discount
-
-    def subtotal(self):
-        return sum(p.price * q for p, q in self.cart.items.items())
-
-    def tax(self):
-        return self.subtotal() * self.tax_rate
-
-    def total(self):
-        return self.subtotal() + self.tax() - self.discount
 
 
 @status("Saving order")
@@ -76,8 +46,6 @@ if __name__ == "__main__":
         "Keyboard": Product("Keyboard", 1500, 15)
     }
 
-    from cart_manager import ShoppingCart
-
     cart = ShoppingCart()
 
     print("\nE-COMMERCE ORDER SYSTEM")
@@ -87,14 +55,16 @@ if __name__ == "__main__":
 
     # User input (controlled)
     qty_laptop = int(input("\nEnter quantity for Laptop (default 1): ") or 1)
-    cart.add_item(products["Laptop"], qty_laptop)
+    cart.add(products["Laptop"], qty_laptop)
     products["Laptop"].reduce_stock(qty_laptop)
 
     qty_mouse = int(input("Enter quantity for Mouse (default 2): ") or 2)
-    cart.add_item(products["Mouse"], qty_mouse)
+    cart.add(products["Mouse"], qty_mouse)
     products["Mouse"].reduce_stock(qty_mouse)
 
-    cart.display_cart()
+    print("\nSHOPPING CART:")
+    for product, qty in cart.items.items():
+        print(f"{product.name} (Qty: {qty}) - {int(product.price * qty)}")
 
     # Discount coupon logic (fixed 18% discount)
     discount = 0
@@ -102,7 +72,7 @@ if __name__ == "__main__":
 
     user_coupon = input("\nEnter discount coupon code (or press Enter to skip): ").strip()
     if user_coupon == coupon_code:
-        discount = order_discount = (sum(p.price * q for p, q in cart.items.items())) * 0.18
+        discount = sum(p.price * q for p, q in cart.items.items()) * 0.18
         print("Coupon applied! 18% discount activated.")
     elif user_coupon:
         print("Invalid coupon code. No discount applied.")
@@ -115,3 +85,14 @@ if __name__ == "__main__":
     print("Total:", int(order.total()))
 
     order_id = save_order(cart)
+    print("\nMENU")
+    print("1. Run Sales Analytics")
+    print("2. Exit")
+
+    choice = input("Enter your choice: ").strip()
+
+    if choice == "1":
+        import analytics
+        analytics.run_analysis()
+    else:
+        print("Exiting program.")
